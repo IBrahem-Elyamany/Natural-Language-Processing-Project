@@ -21,6 +21,7 @@ class LLMService:
         """
         prompt = Prompts.extract_jd_and_n(user_input)
         response = self.provider.generate(prompt)
+        print(response)
 
         try:
             # Parse output format: JD: [text] | N: [number]

@@ -131,6 +131,48 @@ class CollectionService:
     def search(
         self,
         query: str,
+        collection_name: str | None = None,
+    ) -> SearchResponse:
+        """
+        Embed *query*, run similarity search, and return formatted results
+        together with a concatenated context string for LLM consumption.
+        """
+        collection = self._get_collection(collection_name)
+
+        try:
+            jd_text = query.split("|")[0].replace("JD:", "").strip()
+            top_n   = int(query.split("|")[1].replace("N:", "").strip())
+        except:
+            jd_text = user_input
+            top_n   = 2
+
+        query_embedding = self._embedder.encode_single(jd_text)
+        raw = collection.query(query_embeddings=[query_embedding], n_results=top_n)
+
+        response = SearchResponse()
+        if not raw or not raw.get("documents"):
+            return response
+
+        response.context_docs = "\n---\n".join(raw["documents"][0])
+
+        for i, doc in enumerate(raw["documents"][0]):
+            metadata = raw["metadatas"][0][i]
+            distance = raw["distances"][0][i] if "distances" in raw else 0.0
+
+            response.results.append(
+                SearchResult(
+                    rank=i + 1,
+                    filename=metadata.get("filename", "Unknown"),
+                    snippet=doc[:200] + "...",
+                    distance=distance,
+                )
+            )
+
+        return response
+        
+    def search(
+        self,
+        query: str,
         top_n: int,
         collection_name: str | None = None,
     ) -> SearchResponse:
@@ -139,6 +181,7 @@ class CollectionService:
         together with a concatenated context string for LLM consumption.
         """
         collection = self._get_collection(collection_name)
+
         query_embedding = self._embedder.encode_single(query)
         raw = collection.query(query_embeddings=[query_embedding], n_results=top_n)
 

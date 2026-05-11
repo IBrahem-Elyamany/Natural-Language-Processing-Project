@@ -3,6 +3,7 @@ import fitz  # PyMuPDF
 import docx
 import pytesseract
 from PIL import Image
+from pdf2image import convert_from_path
 
 class ExtractionStrategy(ABC):
     @abstractmethod
@@ -17,6 +18,13 @@ class PdfExtractionStrategy(ExtractionStrategy):
             doc = fitz.open(file_path)
             for page in doc:
                 text += page.get_text()
+            doc.close()
+
+            if len(text.strip()) < 50:
+                images = convert_from_path(file_path)
+                for img in images:
+                    text += pytesseract.image_to_string(img)
+                print(f"Imge Text: {text}")
         except Exception as e:
             print(f"Error reading PDF {file_path}: {e}")
         return text
@@ -37,6 +45,7 @@ class ImageExtractionStrategy(ExtractionStrategy):
         try:
             img = Image.open(file_path)
             text = pytesseract.image_to_string(img)
+            print(text)
         except Exception as e:
             print(f"Error reading Image {file_path}: {e}")
         return text

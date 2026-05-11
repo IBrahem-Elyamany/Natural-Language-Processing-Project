@@ -34,7 +34,7 @@ if using locall ollama
 uncomment ollama image in docker compose
 ```bash
 docker-compose up --build ollama
-docker-compose exec ollama ollama pull mistral 
+docker-compose exec ollama ollama pull qwen:2b 
 ```
 
 ## Frontend → Backend Connection

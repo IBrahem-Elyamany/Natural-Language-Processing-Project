@@ -73,7 +73,7 @@ async def match_cvs(
             shutil.rmtree(temp_dir)
 
 
-@router.post("/search")
+@router.post("/search2")
 async def search_cvs(
     job_description: str = Form(...),
     top_n: int = Form(settings.default_top_n),
@@ -105,6 +105,46 @@ async def search_cvs(
 
     return {
         "job_description": job_description,
+        "total_cvs_in_db": collection_svc.count(),
+        "results": [asdict(r) for r in search_response.results],
+        "evaluation_report": evaluation_report,
+    }
+
+
+@router.post("/search")
+async def search_cvs(
+    input: str = Form(...),
+    collection_svc: CollectionService = Depends(get_collection_service),
+):
+    """
+    Search existing CVs in the database against a job description.
+    No file upload needed — queries the pre-indexed ChromaDB collection.
+    """
+    # Check that the collection has data
+    if collection_svc.count() == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="No CVs found in the database. Upload CVs first using /match_cvs.",
+        )
+
+    llm_service = LLMService()
+    # Search the collection
+    jd_text, top_n = llm_service.extract_job_details(input)
+
+    search_response = collection_svc.search(
+        query=jd_text,
+        top_n=top_n
+    )
+
+    # Evaluate candidates using LLM
+    evaluation_report = llm_service.evaluate_candidates(
+        jd_text=jd_text,
+        top_n=top_n,
+        context_docs=search_response.context_docs,
+    )
+
+    return {
+        "job_description": jd_text,
         "total_cvs_in_db": collection_svc.count(),
         "results": [asdict(r) for r in search_response.results],
         "evaluation_report": evaluation_report,

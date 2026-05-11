@@ -2,7 +2,8 @@
 set -e
 
 CHROMA_DIR="./volumes/chroma_data"
-DOWNLOAD_URL="https://www.kaggle.com/code/svzip/317122072"
+DOWNLOAD_URL="https://www.kaggle.com/code/svzip/317718978"
+
 
 # ── Ensure volume directories exist ──
 mkdir -p "./volumes"

@@ -11,7 +11,12 @@ class OllamaProvider(LLMProvider):
         try:
             response = requests.post(
                 f"{self.base_url}/api/generate",
-                json={"model": self.model, "prompt": prompt, "stream": False}
+                json=
+                {
+                    "model": self.model,
+                    "prompt": prompt, 
+                    "stream": False
+                }
             )
             response.raise_for_status()
             return response.json().get("response", "")
