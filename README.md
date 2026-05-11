@@ -2,10 +2,11 @@
 
 ## Features
 
-- Upload CVs in PDF format
+- Upload CVs in PDF, DOCX, and image formats (PNG, JPG, JPEG) using a Strategy Pattern-based text extractor
 - Match CVs against job descriptions using Sentence Transformer model
 - Use ChromaDB for vector storage and retrieval
-- Evaluate candidates using LLM (gemini flash 2.5)
+- Evaluate candidates using LLM (Gemini Flash 2.5)
+- Automated system evaluation suite (accuracy, edge cases, cross-category confusion, hallucination detection, ranking quality) based on ground truth datasets
 
 ## Tech Stack
 
@@ -55,3 +56,7 @@ fetch("/api/v1/search", {
 
 No need to hardcode the backend URL — the proxy handles it in both dev and Docker.
 
+## API Documentation
+
+To explore and test the project APIs (including matching and automated evaluation endpoints), open the interactive Swagger UI at:
+👉 **http://localhost:8001/docs**
