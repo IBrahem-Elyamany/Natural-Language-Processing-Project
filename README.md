@@ -35,3 +35,23 @@ uncomment ollama image in docker compose
 docker-compose up --build ollama
 docker-compose exec ollama ollama pull mistral 
 ```
+
+## Frontend → Backend Connection
+
+The frontend uses a Vite proxy so all API calls go through `/api/` which is rewritten and forwarded to the FastAPI backend:
+
+```
+Frontend  →  /api/v1/search  →  Vite proxy strips /api  →  backend:8000/v1/search
+```
+
+In your frontend code, use `/api/` as the base path:
+```js
+// Example: search CVs
+fetch("/api/v1/search", {
+  method: "POST",
+  body: formData,
+});
+```
+
+No need to hardcode the backend URL — the proxy handles it in both dev and Docker.
+
