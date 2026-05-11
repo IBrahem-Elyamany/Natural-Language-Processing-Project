@@ -1,6 +1,5 @@
 import os
 import shutil
-import fitz  # PyMuPDF
 from dataclasses import asdict
 from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException
 from typing import List
@@ -8,20 +7,9 @@ from typing import List
 from app.core.config import settings
 from app.services.collection_service import CollectionService, get_collection_service
 from app.services.llm.llm_service import LLMService
+from app.services.extractor.service import TextExtractorService
 
 router = APIRouter()
-
-
-def extract_text_from_pdf(pdf_path: str) -> str:
-    """Extract raw text from a PDF file using PyMuPDF."""
-    text = ""
-    try:
-        doc = fitz.open(pdf_path)
-        for page in doc:
-            text += page.get_text()
-    except Exception as e:
-        print(f"Error reading {pdf_path}: {e}")
-    return text
 
 
 @router.post("/match_cvs")
@@ -39,14 +27,16 @@ async def match_cvs(
     os.makedirs(temp_dir, exist_ok=True)
 
     try:
-        # Process each uploaded PDF
+        extractor_svc = TextExtractorService()
+
+        # Process each uploaded file
         for file in files:
             file_path = os.path.join(temp_dir, file.filename)
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
             # Extract text
-            text = extract_text_from_pdf(file_path)
+            text = extractor_svc.extract_text(file_path)
             if not text.strip():
                 continue
 
