@@ -1,0 +1,566 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-11T04:21:36.776057+00:00",
+    "source_csv": "final_24k_resumes_master.csv",
+    "total_cvs": 24228,
+    "total_categories": 85,
+    "categories": [
+      "Accountant",
+      "Advocate",
+      "Agricultural",
+      "Agriculture",
+      "Apparel",
+      "Architect",
+      "Architects",
+      "Arts",
+      "Automobile",
+      "Avian",
+      "Aviation",
+      "Banking",
+      "Blockchain",
+      "Bpo",
+      "Building",
+      "Building _construction",
+      "Business analyst",
+      "Business-development",
+      "Businessanalyst",
+      "Chef",
+      "Civil engineer",
+      "Civilengineer",
+      "Construction",
+      "Consult",
+      "Consultant",
+      "Data science",
+      "Database",
+      "Datascience",
+      "Design",
+      "Designer",
+      "Designing",
+      "Devops engineer",
+      "Devopsengineer",
+      "Digital",
+      "Digital media",
+      "Digital-media",
+      "Dot",
+      "Dotnet developer",
+      "Education",
+      "Electrical engineering",
+      "Electricalengineer",
+      "Engineering",
+      "Etl",
+      "Etl developer",
+      "Finance",
+      "Fitness",
+      "Food",
+      "Food_beverages",
+      "Health_fitness",
+      "Healthcare",
+      "Healthfitness",
+      "Hr",
+      "Human resources",
+      "Information technology",
+      "Information-technology",
+      "It",
+      "Java developer",
+      "Javadeveloper",
+      "Management",
+      "Managment",
+      "Mechanical engineer",
+      "Mechanicalengineer",
+      "Network security engineer",
+      "Nse",
+      "Operationmanager",
+      "Operations manager",
+      "Pbo",
+      "Pmo",
+      "Public",
+      "Public relations",
+      "Public-relations",
+      "Python developer",
+      "Pythondeveloper",
+      "React",
+      "React developer",
+      "Sales",
+      "Sap developer",
+      "Sapdeveloper",
+      "Sql",
+      "Sql developer",
+      "Teacher",
+      "Testing",
+      "Unknown",
+      "Web designing",
+      "Webdesigning"
+    ],
+    "description": "Ground truth dataset for evaluating the ROMI RAG CV-Matching system.  Covers retrieval accuracy, edge cases, cross-category confusion, hallucination detection, and ranking quality."
+  },
+  "evaluation_dimensions": {
+    "retrieval_accuracy": {
+      "description": "Does the system retrieve CVs from the correct professional category when given a specific job description?",
+      "how_to_evaluate": "For each case, submit the 'query' to the /search endpoint and check whether the returned CV filenames / metadata belong to one of the 'expected_categories'.",
+      "metric": "Precision@K — fraction of top-K results in expected category.",
+      "test_cases": [
+        {
+          "id": "RA-01",
+          "query": "Looking for a Senior Data Scientist with 5+ years experience in machine learning, deep learning, NLP, and statistical modeling. Proficiency in Python, TensorFlow, and SQL required.",
+          "expected_categories": [
+            "Data science",
+            "Datascience"
+          ],
+          "rationale": "Pure data-science query — keywords align cleanly with the category.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "63.docx",
+              "text_preview": "summary jessica claire 100 claire st 10th floor 555 432 1000 structured academic professional illustrating a strong history of positive student learning outcomes fostered through creative curriculum delivery skilled in utilizing thought provoking discussions to increase student participation and inc"
+            },
+            {
+              "filename": "44.png",
+              "text_preview": "jessica claire 100 montgomery st 10th floor 555 432 1000 resumesamplegexample com professional summary data scientist leader experienced in identifying opportunities using data and strategizing methods for improvement skilled in predictive modeling statistics and hypothetical testing experienced wor"
+            }
+          ]
+        },
+        {
+          "id": "RA-02",
+          "query": "We need a React.js front-end developer experienced with Redux, TypeScript, REST APIs, and responsive UI design.",
+          "expected_categories": [
+            "React developer",
+            "React"
+          ],
+          "rationale": "Front-end React role; should not retrieve generic IT or Java CVs.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "50.png",
+              "text_preview": "professional summary technical skills work history education jessica claire montgomery street san francisco ca 94105 2 555 432 1000 4 resourceful front end web developer bringing in depth knowledge of latest technology trends to produce clean website design experience handling complex html and css c"
+            },
+            {
+              "filename": "194.docx",
+              "text_preview": "jessica claire montgomery street san francisco ca 94105 555 432 1000 summary currently working for williams interactive phantom efx and have worked here for almost 2 years my job is to create original contentfor are slot machines before i worked for geeva games as lead artist in czech republic desig"
+            }
+          ]
+        },
+        {
+          "id": "RA-03",
+          "query": "Hiring a Certified Public Accountant (CPA) to manage financial statements, tax filings, and audit coordination for a mid-size firm.",
+          "expected_categories": [
+            "Accountant"
+          ],
+          "rationale": "Finance domain — must not confuse with Banking or Finance categories.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "9c75ea3d12326bc4.png",
+              "text_preview": "first last city state 555 555 5555 linkedin staff account recent college graduate with 1 year of accounting and financial analysis experience education bachelor of business administration finance university of california riverside may 2023 graduated magna cum laude accounting projects experience the"
+            },
+            {
+              "filename": "85.png",
+              "text_preview": "jessica claire 100 montgomery st 10th floor 555 432 1000 professional summary detail oriented accountant with 22 years of effectively maintaining accurate accounting information for large scale financial organizations history working as part of a financial team to manage diverse financial functions "
+            }
+          ]
+        },
+        {
+          "id": "RA-04",
+          "query": "Seeking a DevOps Engineer skilled in CI/CD pipelines, Kubernetes, Docker, Terraform, and cloud platforms (AWS / GCP).",
+          "expected_categories": [
+            "Devops engineer",
+            "Devopsengineer"
+          ],
+          "rationale": "DevOps is a distinct role from generic IT or backend development.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "18.png",
+              "text_preview": "professional summary linkedin certifications work history skills education jessica claire 100 montgomery st 10th floor 2 555 432 1000 4 devops engineer with good experience in the it industry comprising of devops cloud computing infrastructure configuration management linux systems administration an"
+            },
+            {
+              "filename": "Image_81.png",
+              "text_preview": "first last cloud devops engineer devops engineer with 9 years of experience building testing and maintaining infrastructures and tools to allow for the speedy development and release of the software key accomplishments include reduced power and rack utilization by spearheading a software upgrade tha"
+            }
+          ]
+        },
+        {
+          "id": "RA-05",
+          "query": "Agricultural field technician needed for crop management, tractor operation, and farm equipment maintenance.",
+          "expected_categories": [
+            "Agricultural",
+            "Agriculture"
+          ],
+          "rationale": "Niche domain; verifies that the system handles non-tech categories.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "145.png",
+              "text_preview": "jessica claire 100 montgomery st 10th floor 555 432 1000 professional summary diligent and hard communication skills reliable worker with strong work ethic deadline driven heavy equipment operator familiar with safety regulations vorking candidate ready to contribute solid effort as team member thor"
+            },
+            {
+              "filename": "Image_37.pdf",
+              "text_preview": "farm worker resume james avery 1434 spadafore drive erie pa 16501 333 705 6359 job objective seeking a farm worker position with a quality company in which to use my skills to help improve the business as a whole while enhancing my career highlights of qualifications v profound knowledge of farm wor"
+            }
+          ]
+        },
+        {
+          "id": "RA-06",
+          "query": "Hiring a Python backend developer with experience in Django, Flask, REST APIs, and PostgreSQL.",
+          "expected_categories": [
+            "Python developer",
+            "Pythondeveloper"
+          ],
+          "rationale": "Python developer — should NOT retrieve generic Data Science CVs.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "Image_26.pdf",
+              "text_preview": "daryl jacobi 119 skylar landing phoenix az 1 555 426 5261 work experience senior python developer 10 2017 present phoenix az creation of python backend and javascript frontend components integrating with the firm s enterprise management systems hands on experience developing and maintaining innovati"
+            },
+            {
+              "filename": "Image_10.pdf",
+              "text_preview": "kennedy klekamp python developer profile python developer with 1 year of experience in designing developing and implementing software solutions using python programming language proficient in creating web applications integrating apis and leveraging data analysis libraries adept at working in agile "
+            }
+          ]
+        },
+        {
+          "id": "RA-07",
+          "query": "We are looking for a Civil Engineer with experience in structural design, AutoCAD, project management, and site supervision.",
+          "expected_categories": [
+            "Civil engineer",
+            "Civilengineer"
+          ],
+          "rationale": "Engineering sub-domain; must not confuse with Mechanical or Electrical.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "Image_9.jpg",
+              "text_preview": "ali bowman civil engineer 1515 pacific ave los angeles ca 90291 united states 541 754 3010 place of birth nationality links profile employment history jan 2017 present jan 2014 dec 2016 jan 2014 dec 2014 education jun 2019 present san antonio driving license full american facebook twitter innovation"
+            },
+            {
+              "filename": "Image_59.jpg",
+              "text_preview": "known software e autocad civil 3d e etabs strand7 microsoft office ms project languages english french arabic eee german eee certificates land and building surveying iran s surveying institute 160 hours of training at iran s surveying institute education master of professional engineering civil engi"
+            }
+          ]
+        },
+        {
+          "id": "RA-08",
+          "query": "Need an HR Manager experienced in talent acquisition, employee relations, performance management, and labor law compliance.",
+          "expected_categories": [
+            "Human resources",
+            "Hr"
+          ],
+          "rationale": "HR query — two category variants exist (Human resources / Hr).",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "1.pdf",
+              "text_preview": "jessica claire montgomery street san francisco ca 94105 555 432 1000 summary hr recruiter who communicates and collaborates effectively with all levels of personnel by relying on excellent interpersonal skills outstanding customer service and a solid expertise in human resources management highlight"
+            },
+            {
+              "filename": "154.png",
+              "text_preview": "jessica claire montgomery street san francisco ca 94105 555 432 1000 summary capable counselor ready to offer knowledge and abilities to challenging role in substance abuse familiar with helping people of different ability levels enjoy recreation and enhance wellness safety oriented and observant wi"
+            }
+          ]
+        },
+        {
+          "id": "RA-09",
+          "query": "Hiring a Java Developer with experience in Spring Boot, Microservices, Hibernate, and RESTful API development.",
+          "expected_categories": [
+            "Java developer",
+            "Javadeveloper"
+          ],
+          "rationale": "Java vs other developer categories (React, Python, SAP) is a key distinction.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "Image_75.png",
+              "text_preview": "first last senior java developer sacramento california 1 234 456 789 linkedin com in username senior java developer with 10 years of leading teams and delivering high quality software on time and within budget key achievement brainstormed with 1300 business owners to translate functional requirement"
+            },
+            {
+              "filename": "Image_36.pdf",
+              "text_preview": "jared arthur maica java developer enthusiastic and well organized java developer with 3 years of experience eager to join microsoft to bring in top class java development and problem solving skills in previous roles reduced app memory consumption by 30 and decreased startup time for apps by 70 fe ex"
+            }
+          ]
+        },
+        {
+          "id": "RA-10",
+          "query": "Looking for a Banking professional with expertise in trade finance, credit analysis, and relationship management.",
+          "expected_categories": [
+            "Banking"
+          ],
+          "rationale": "Financial services — Banking vs Accountant vs Finance disambiguation.",
+          "ground_truth_cv_samples": [
+            {
+              "filename": "141.pdf",
+              "text_preview": "jessica claire 100 montgomery st 10th floor 555 432 1000 summary recent graduate with excellent research technical and problem solving skills detail oriented and able to learn new concepts quickly highly motivated employee with desire to take on new challenges strong worth ethic adaptability and exc"
+            },
+            {
+              "filename": "120.png",
+              "text_preview": "jessica claire 555 432 1000 montgomery street san francisco ca 94105 skills goal oriented strong team builder organized team player analytical cash handling expertise sales professional customer service education university of california santa cruz santa cruz ca 1995 bachelor of arts community studi"
+            }
+          ]
+        }
+      ]
+    },
+    "edge_cases": {
+      "description": "How does the system handle ambiguous, empty, off-domain, or malformed queries?",
+      "how_to_evaluate": "Submit each query and verify the 'expected_behavior'. Record whether the system crashed, hallucinated, or gracefully handled the failure.",
+      "metric": "Pass / Fail per case.  Document failure modes.",
+      "test_cases": [
+        {
+          "id": "EC-01",
+          "query": "developer",
+          "expected_behavior": "ambiguous_retrieval",
+          "description": "Single-word query is highly ambiguous — could match React, Python, Java, SAP, SQL, ETL, or Dotnet developers. System should either return mixed results or flag low confidence.",
+          "failure_type": "ambiguity"
+        },
+        {
+          "id": "EC-02",
+          "query": "Looking for a quantum computing researcher with publications in topological qubits and experience with IBM Qiskit.",
+          "expected_behavior": "no_relevant_match",
+          "description": "Quantum computing is NOT a category in the dataset. The system should return low-relevance results or admit no strong match.",
+          "failure_type": "off_domain"
+        },
+        {
+          "id": "EC-03",
+          "query": "",
+          "expected_behavior": "error_or_empty",
+          "description": "Empty query — the system should return an error or empty results, not hallucinate a job description.",
+          "failure_type": "empty_input"
+        },
+        {
+          "id": "EC-04",
+          "query": "good person who works hard and is nice",
+          "expected_behavior": "no_relevant_match",
+          "description": "Personality-only query with no technical skills or domain. System has no meaningful signal to match against.",
+          "failure_type": "vague_query"
+        },
+        {
+          "id": "EC-05",
+          "query": "Need a chef who is also a certified public accountant and has experience in aviation engineering.",
+          "expected_behavior": "confused_retrieval",
+          "description": "Contradictory multi-domain query. No single CV will match all three domains. System may retrieve random mix or hallucinate.",
+          "failure_type": "contradictory"
+        },
+        {
+          "id": "EC-06",
+          "query": "مطلوب مهندس برمجيات لديه خبرة في تطوير تطبيقات الويب",
+          "expected_behavior": "poor_or_no_match",
+          "description": "Arabic query ('Software engineer needed with web development experience'). The CV corpus is English-only so the embedding model may fail to bridge the language gap.",
+          "failure_type": "language_mismatch"
+        },
+        {
+          "id": "EC-07",
+          "query": "a]b[c{d}e<f>g!@#$%^&*()",
+          "expected_behavior": "error_or_empty",
+          "description": "Special characters / garbage input — should be handled gracefully rather than crashing.",
+          "failure_type": "malformed_input"
+        }
+      ]
+    },
+    "cross_category_confusion": {
+      "description": "Can the system distinguish between categories that share overlapping domain vocabulary?",
+      "how_to_evaluate": "Submit each query and check that the top-1 result belongs to 'expected_category', not any of the 'confusing_categories'.",
+      "metric": "Confusion-free rate — % of cases where top-1 is correct.",
+      "test_cases": [
+        {
+          "id": "CC-01",
+          "query": "Hiring an Electrical Engineer with experience in circuit design, power systems, and PLC programming.",
+          "expected_category": "Electrical engineering",
+          "confusing_categories": [
+            "Mechanicalengineer",
+            "Mechanical engineer"
+          ],
+          "overlap_reason": "Both are engineering fields sharing project management and CAD vocabulary."
+        },
+        {
+          "id": "CC-02",
+          "query": "Need an ETL Developer experienced with SSIS, Informatica, data warehousing, and SQL Server.",
+          "expected_category": "Etl developer",
+          "confusing_categories": [
+            "Sql developer",
+            "Database",
+            "Sql"
+          ],
+          "overlap_reason": "ETL, SQL, and Database roles all share SQL and data pipeline terminology."
+        },
+        {
+          "id": "CC-03",
+          "query": "Business Analyst needed — requirements gathering, stakeholder management, JIRA, and Agile methodology.",
+          "expected_category": "Business analyst",
+          "confusing_categories": [
+            "Consultant",
+            "Management",
+            "Consult"
+          ],
+          "overlap_reason": "Business Analysts and Consultants share analysis and strategy vocabulary."
+        },
+        {
+          "id": "CC-04",
+          "query": "Hiring a Graphic Designer proficient in Photoshop, Illustrator, Figma, and brand identity design.",
+          "expected_category": "Designer",
+          "confusing_categories": [
+            "Web designing",
+            "Webdesigning",
+            "Digital media",
+            "Digital"
+          ],
+          "overlap_reason": "Design roles share creative-tool vocabulary (Adobe suite, UI/UX)."
+        },
+        {
+          "id": "CC-05",
+          "query": "Public Relations Specialist needed for media outreach, press releases, and corporate communications.",
+          "expected_category": "Public relations",
+          "confusing_categories": [
+            "Public",
+            "Digital media",
+            "Digital-media"
+          ],
+          "overlap_reason": "PR and Digital Media both deal with communications and media."
+        }
+      ]
+    },
+    "hallucination_detection": {
+      "description": "Does the LLM fabricate information not present in the retrieved context chunks?",
+      "how_to_evaluate": "Feed the 'retrieved_context' as context_docs to the LLM evaluate_candidates prompt.  Manually verify every claim in the LLM output against the context using the 'checks' list.",
+      "metric": "Hallucination rate — fraction of outputs containing fabricated facts.",
+      "test_cases": [
+        {
+          "id": "HD-01",
+          "query": "Find the best accountant candidate.",
+          "retrieved_context": "jessica claire 555 432 1000 100 montgomery st 10th 9 floor skills accounting and bookkeeping account reconciliation reporting a p and a r quickbooks customer relations general ledger entries education and training university of the south pacific fiji islands bachelor of commerce accounting and information system summary motivated versatile accounting professional seeking to obtain an opportunity with your organization which will benefit from my problem solving skills technical strength strong professional ethics comprehensive knowledge of information systems and ability to comply with instruct",
+          "context_source_file": "67.pdf",
+          "checks": [
+            "LLM must NOT invent skills not present in retrieved_context.",
+            "LLM must NOT fabricate a candidate name if none appears in context.",
+            "LLM must NOT cite specific years of experience unless context states them.",
+            "LLM must NOT reference companies not mentioned in context."
+          ],
+          "description": "Provide the retrieved_context as the ONLY input to the LLM. Any facts in the LLM output not traceable to this context constitute a hallucination."
+        },
+        {
+          "id": "HD-02",
+          "query": "Find the best data science candidate.",
+          "retrieved_context": "jessica claire montgomery street san francisco ca 94105 555 432 1000 professional summary passionate knowledgeable educator with over 19 years of experience providing educational guidance and mentor ship to middle and high students shifts teaching methods and instructional materials to meet students diverse needs caring and enthusiastic with demonstrated skills in family and consumer science skills curriculum development motivating and inspiring technology integration life long leamer budgets and record keeping optimist skilled in computer and embroidery digitizing software compassionate work ",
+          "context_source_file": "68.png",
+          "checks": [
+            "LLM must NOT invent skills not present in retrieved_context.",
+            "LLM must NOT fabricate a candidate name if none appears in context.",
+            "LLM must NOT cite specific years of experience unless context states them.",
+            "LLM must NOT reference companies not mentioned in context."
+          ],
+          "description": "Provide the retrieved_context as the ONLY input to the LLM. Any facts in the LLM output not traceable to this context constitute a hallucination."
+        },
+        {
+          "id": "HD-03",
+          "query": "Find the best civil engineer candidate.",
+          "retrieved_context": "michael berry summary result oriented professional experienced in all civil engineering works project management contract management design review estimation quantity surveying cost control material management quality management hse pivotal in site methodologies in compliance with safety quality cost control standards competent cross functional skills ensuring on time delivery within pre set cost parameters involved in handling quantity surveying related activities involving resource planning in process inspection and coordination with internal departments a keen communicator with well honed i",
+          "context_source_file": "Image_32.pdf",
+          "checks": [
+            "LLM must NOT invent skills not present in retrieved_context.",
+            "LLM must NOT fabricate a candidate name if none appears in context.",
+            "LLM must NOT cite specific years of experience unless context states them.",
+            "LLM must NOT reference companies not mentioned in context."
+          ],
+          "description": "Provide the retrieved_context as the ONLY input to the LLM. Any facts in the LLM output not traceable to this context constitute a hallucination."
+        },
+        {
+          "id": "HD-04",
+          "query": "Find the best designer candidate.",
+          "retrieved_context": "jessica claire 555 432 1000 9 montgomery street san francisco ca 94105 highlights proficient in autocad softplan adobe photoshop excel design workbooks prepared schematics design development construction documents interior architectural detailing product specification color and material application specification of ff e employed supervised and mentored architects interior designers and cadd operators project manager in residential commercial and hospitality launched owned and operated successful design firm experienced in multiple areas of design architectural interiors landscape and material ",
+          "context_source_file": "103.pdf",
+          "checks": [
+            "LLM must NOT invent skills not present in retrieved_context.",
+            "LLM must NOT fabricate a candidate name if none appears in context.",
+            "LLM must NOT cite specific years of experience unless context states them.",
+            "LLM must NOT reference companies not mentioned in context."
+          ],
+          "description": "Provide the retrieved_context as the ONLY input to the LLM. Any facts in the LLM output not traceable to this context constitute a hallucination."
+        },
+        {
+          "id": "HD-05",
+          "query": "Find the best banking candidate.",
+          "retrieved_context": "name last name city state phone number email linkedin url regional vice president mortgage planner mortgage consultant business development mortgage banking expert with a proven record of success in leadership of all facets of mortgage banking in the last two decades helped thousands of homeowners as well as home buyers achieve the dream of home ownership and retention of it built a boutique mortgage company that served home and commercial financing seekers in several castern states mortgage lending mortgage underwriting business strategy operation optimization areas of expertise real estate e",
+          "context_source_file": "eb4d520237782c06.docx",
+          "checks": [
+            "LLM must NOT invent skills not present in retrieved_context.",
+            "LLM must NOT fabricate a candidate name if none appears in context.",
+            "LLM must NOT cite specific years of experience unless context states them.",
+            "LLM must NOT reference companies not mentioned in context."
+          ],
+          "description": "Provide the retrieved_context as the ONLY input to the LLM. Any facts in the LLM output not traceable to this context constitute a hallucination."
+        }
+      ]
+    },
+    "ranking_quality": {
+      "description": "When multiple categories are partially relevant, does the system rank the most relevant one first?",
+      "how_to_evaluate": "Submit each query with top_n=10 and check whether the category distribution of results matches 'expected_ranking'.",
+      "metric": "NDCG or manual rank correlation.",
+      "test_cases": [
+        {
+          "id": "RQ-01",
+          "query": "Full-stack developer with React front-end and Python Django back-end experience.",
+          "expected_ranking": [
+            {
+              "rank": 1,
+              "category": "React developer",
+              "reason": "React is the primary skill mentioned."
+            },
+            {
+              "rank": 2,
+              "category": "Python developer",
+              "reason": "Django back-end is secondary."
+            },
+            {
+              "rank": 3,
+              "category": "Web designing",
+              "reason": "Web design is tangentially related."
+            }
+          ],
+          "description": "Query mentions both React and Python. Ideal retrieval should surface React CVs first, then Python, then generic web design."
+        },
+        {
+          "id": "RQ-02",
+          "query": "Data analyst with SQL expertise and experience building ETL pipelines.",
+          "expected_ranking": [
+            {
+              "rank": 1,
+              "category": "Data science",
+              "reason": "Data analyst closest to data science."
+            },
+            {
+              "rank": 2,
+              "category": "Etl developer",
+              "reason": "ETL pipeline expertise."
+            },
+            {
+              "rank": 3,
+              "category": "Sql developer",
+              "reason": "SQL is a tool, not the core role."
+            }
+          ],
+          "description": "Overlapping skills across Data Science, ETL, and SQL categories. Ranking reveals retrieval precision."
+        },
+        {
+          "id": "RQ-03",
+          "query": "Operations Manager for a manufacturing facility — supply chain, lean manufacturing, Six Sigma, team leadership.",
+          "expected_ranking": [
+            {
+              "rank": 1,
+              "category": "Operations manager",
+              "reason": "Direct role match."
+            },
+            {
+              "rank": 2,
+              "category": "Management",
+              "reason": "General management overlap."
+            },
+            {
+              "rank": 3,
+              "category": "Mechanical engineer",
+              "reason": "Manufacturing context overlap."
+            }
+          ],
+          "description": "Tests whether the system correctly prefers the exact role category over broader management or engineering categories."
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_test_cases": 30,
+    "per_dimension": {
+      "retrieval_accuracy": 10,
+      "edge_cases": 7,
+      "cross_category_confusion": 5,
+      "hallucination_detection": 5,
+      "ranking_quality": 3
+    }
+  }
+}
