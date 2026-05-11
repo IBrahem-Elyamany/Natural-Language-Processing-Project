@@ -3,7 +3,6 @@ CollectionService — single responsibility layer for all vector-DB operations.
 
 This service owns:
   • Text chunking
-  • Embedding (SentenceTransformer)
   • Upserting documents into ChromaDB
   • Querying / similarity search
   • Collection introspection (count, peek, diagnostics)
@@ -18,12 +17,11 @@ from dataclasses import dataclass, field
 from typing import List
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
-
 from fastapi import Depends
 
 from app.core.config import settings
 from app.core.chroma import ChromaService, get_chroma_service
+from app.services.embedding_service import EmbeddingService, get_embedding_service
 
 
 # ── Data-transfer objects ────────────────────────────────────────────
@@ -68,14 +66,14 @@ class CollectionService:
     Encapsulates all interaction with the vector store.
 
     Depends on:
-      - ChromaService  (low-level client lifecycle)
-      - SentenceTransformer  (embedding model)
+      - ChromaService       (low-level client lifecycle)
+      - EmbeddingService    (singleton embedding model)
       - RecursiveCharacterTextSplitter  (chunking)
     """
 
-    def __init__(self, chroma: ChromaService) -> None:
+    def __init__(self, chroma: ChromaService, embedder: EmbeddingService) -> None:
         self._chroma = chroma
-        self._model = SentenceTransformer(settings.sentence_transformer_model)
+        self._embedder = embedder
 
     # ── helpers ──────────────────────────────────────────────────────
 
@@ -95,7 +93,7 @@ class CollectionService:
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         """Return embedding vectors for a list of texts."""
-        return self._model.encode(texts).tolist()
+        return self._embedder.encode(texts)
 
     # ── write operations ─────────────────────────────────────────────
 
@@ -118,7 +116,7 @@ class CollectionService:
 
         for i, chunk in enumerate(chunks):
             chunk_id = f"{filename}_chunk_{i}"
-            embedding = self._model.encode([chunk])[0].tolist()
+            embedding = self._embedder.encode_single(chunk)
             collection.upsert(
                 ids=[chunk_id],
                 embeddings=[embedding],
@@ -141,7 +139,7 @@ class CollectionService:
         together with a concatenated context string for LLM consumption.
         """
         collection = self._get_collection(collection_name)
-        query_embedding = self._model.encode([query])[0].tolist()
+        query_embedding = self._embedder.encode_single(query)
         raw = collection.query(query_embeddings=[query_embedding], n_results=top_n)
 
         response = SearchResponse()
@@ -265,10 +263,11 @@ class CollectionService:
 
 def get_collection_service(
     chroma: ChromaService = Depends(get_chroma_service),
+    embedder: EmbeddingService = Depends(get_embedding_service),
 ) -> CollectionService:
     """
     FastAPI dependency.  Builds a CollectionService backed by the
-    singleton ChromaService.
+    singleton ChromaService and EmbeddingService.
     """
-    return CollectionService(chroma)
+    return CollectionService(chroma, embedder)
 
