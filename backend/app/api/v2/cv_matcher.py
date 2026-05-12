@@ -14,9 +14,8 @@ router = APIRouter()
 
 @router.post("/match_cvs")
 async def match_cvs(
-    job_description: str = Form(...),
+    input: str = Form(...),
     files: List[UploadFile] = File(...),
-    top_n: int = Form(3),
     collection_svc: CollectionService = Depends(get_collection_service),
 ):
     if not files:
@@ -47,22 +46,26 @@ async def match_cvs(
             if chunks_stored > 0:
                 uploaded_docs.append(file.filename)
 
-        # Search the collection using the job description
+        llm_service = LLMService()
+        # Search the collection
+        jd_text, top_n = llm_service.extract_job_details(input)
+
         search_response = collection_svc.search(
-            query=job_description, top_n=top_n
+            query=jd_text,
+            top_n=top_n
         )
 
         # Evaluate candidates using LLM
         llm_service = LLMService()
         evaluation_report = llm_service.evaluate_candidates(
-            jd_text=job_description,
+            jd_text=jd_text,
             top_n=top_n,
             context_docs=search_response.context_docs,
         )
 
         return {
             "message": f"Successfully processed {len(uploaded_docs)} CVs",
-            "job_description": job_description,
+            "job_description": jd_text,
             "results": [asdict(r) for r in search_response.results],
             "evaluation_report": evaluation_report,
         }
@@ -75,8 +78,7 @@ async def match_cvs(
 
 @router.post("/search")
 async def search_cvs(
-    job_description: str = Form(...),
-    top_n: int = Form(settings.default_top_n),
+    input: str = Form(...),
     collection_svc: CollectionService = Depends(get_collection_service),
 ):
     """
@@ -90,21 +92,24 @@ async def search_cvs(
             detail="No CVs found in the database. Upload CVs first using /match_cvs.",
         )
 
+    llm_service = LLMService()
     # Search the collection
+    jd_text, top_n = llm_service.extract_job_details(input)
+
     search_response = collection_svc.search(
-        query=job_description, top_n=top_n
+        query=jd_text,
+        top_n=top_n
     )
 
     # Evaluate candidates using LLM
-    llm_service = LLMService()
     evaluation_report = llm_service.evaluate_candidates(
-        jd_text=job_description,
+        jd_text=jd_text,
         top_n=top_n,
         context_docs=search_response.context_docs,
     )
 
     return {
-        "job_description": job_description,
+        "job_description": jd_text,
         "total_cvs_in_db": collection_svc.count(),
         "results": [asdict(r) for r in search_response.results],
         "evaluation_report": evaluation_report,

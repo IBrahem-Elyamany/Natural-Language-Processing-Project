@@ -12,7 +12,6 @@ stored — they just call methods here.
 """
 
 from __future__ import annotations
-
 from typing import List
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -108,8 +107,8 @@ class CollectionService:
             jd_text = query.split("|")[0].replace("JD:", "").strip()
             top_n   = int(query.split("|")[1].replace("N:", "").strip())
         except:
-            jd_text = user_input
-            top_n   = 2
+            jd_text = query
+            top_n   = settings.default_top_n
 
         query_embedding = self._embedder.encode_single(jd_text)
         raw = collection.query(query_embeddings=[query_embedding], n_results=top_n)
