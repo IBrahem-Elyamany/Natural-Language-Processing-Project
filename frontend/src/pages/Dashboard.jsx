@@ -17,7 +17,7 @@ export default function Dashboard() {
       const formData = new FormData();
       formData.append('input', query);
 
-      const response = await fetch('http://localhost:8000/api/v2/search', {
+      const response = await fetch('/api/v2/search', {
         method: 'POST',
         body: formData,
       });
