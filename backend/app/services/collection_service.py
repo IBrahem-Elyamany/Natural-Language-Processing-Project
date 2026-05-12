@@ -13,7 +13,6 @@ stored — they just call methods here.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import List
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -22,41 +21,7 @@ from fastapi import Depends
 from app.core.config import settings
 from app.core.chroma import ChromaService, get_chroma_service
 from app.services.embedding_service import EmbeddingService, get_embedding_service
-
-
-# ── Data-transfer objects ────────────────────────────────────────────
-
-@dataclass
-class SearchResult:
-    """A single ranked search hit."""
-    rank: int
-    filename: str
-    snippet: str
-    distance: float
-
-
-@dataclass
-class SearchResponse:
-    """Everything a route needs after a similarity search."""
-    results: list[SearchResult] = field(default_factory=list)
-    context_docs: str = ""
-
-
-@dataclass
-class CollectionInfo:
-    """Summary info about a collection."""
-    name: str
-    total_chunks: int
-    unique_files: list[str]
-    unique_file_count: int
-
-
-@dataclass
-class PeekSample:
-    """A single document preview."""
-    id: str
-    filename: str
-    snippet: str
+from app.schemas.collection import SearchResult, SearchResponse, CollectionInfo, PeekSample
 
 
 # ── Service ──────────────────────────────────────────────────────────
