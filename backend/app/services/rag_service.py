@@ -94,7 +94,7 @@ class RAGService:
             response.results.append(
                 SearchResult(
                     rank=i + 1,
-                    filename=metadata.get("filename", "Unknown"),
+                    filename=metadata.get("candidate_id", "Unknown"),
                     snippet=doc[:200] + "...",
                     distance=distance,
                 )
