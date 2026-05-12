@@ -27,9 +27,9 @@ export default function Sidebar() {
         </Link>
 
         <Link 
-          to="/search" 
+          to="/Database" 
           className={`flex items-center gap-stack-md px-gutter py-stack-md transition-all duration-200 ${
-            location.pathname === '/search' 
+            location.pathname === '/Database' 
             ? 'text-primary dark:text-primary-fixed-dim font-semibold border-l-4 border-primary bg-primary-container/10 active:scale-[0.98]' 
             : 'text-secondary dark:text-slate-400 font-medium hover:bg-surface-container-low dark:hover:bg-slate-700'
           }`}
