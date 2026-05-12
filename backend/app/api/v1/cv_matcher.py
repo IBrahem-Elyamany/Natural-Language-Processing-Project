@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException
 from typing import List
 
 from app.core.config import settings
-from app.services.collection_service import CollectionService, get_collection_service
+from app.services.rag_service import RAGService, get_rag_service
 from app.services.llm.llm_service import LLMService
 from app.services.extractor.service import TextExtractorService
 
@@ -17,7 +17,7 @@ async def match_cvs(
     job_description: str = Form(...),
     files: List[UploadFile] = File(...),
     top_n: int = Form(3),
-    collection_svc: CollectionService = Depends(get_collection_service),
+    rag_svc: RAGService = Depends(get_rag_service),
 ):
     if not files:
         raise HTTPException(status_code=400, detail="No CV files provided")
@@ -40,15 +40,15 @@ async def match_cvs(
             if not text.strip():
                 continue
 
-            # Chunk, embed, and store via CollectionService
-            chunks_stored = collection_svc.upsert_document(
+            # Chunk, embed, and store via RAGService
+            chunks_stored = rag_svc.upsert_document(
                 filename=file.filename, text=text
             )
             if chunks_stored > 0:
                 uploaded_docs.append(file.filename)
 
         # Search the collection using the job description
-        search_response = collection_svc.search(
+        search_response = rag_svc.search(
             query=job_description, top_n=top_n
         )
 
@@ -77,21 +77,21 @@ async def match_cvs(
 async def search_cvs(
     job_description: str = Form(...),
     top_n: int = Form(settings.default_top_n),
-    collection_svc: CollectionService = Depends(get_collection_service),
+    rag_svc: RAGService = Depends(get_rag_service),
 ):
     """
     Search existing CVs in the database against a job description.
     No file upload needed — queries the pre-indexed ChromaDB collection.
     """
     # Check that the collection has data
-    if collection_svc.count() == 0:
+    if rag_svc.count() == 0:
         raise HTTPException(
             status_code=404,
             detail="No CVs found in the database. Upload CVs first using /match_cvs.",
         )
 
     # Search the collection
-    search_response = collection_svc.search(
+    search_response = rag_svc.search(
         query=job_description, top_n=top_n
     )
 
@@ -105,7 +105,7 @@ async def search_cvs(
 
     return {
         "job_description": job_description,
-        "total_cvs_in_db": collection_svc.count(),
+        "total_cvs_in_db": rag_svc.count(),
         "results": [asdict(r) for r in search_response.results],
         "evaluation_report": evaluation_report,
     }

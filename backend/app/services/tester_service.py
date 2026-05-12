@@ -8,7 +8,7 @@ Loads the ground_truth.json file and runs test cases across five dimensions:
   4. Hallucination Detection  (LLM output vs. retrieved context)
   5. Ranking Quality          (NDCG / rank correlation)
 
-Depends on CollectionService (vector search) and LLMService (evaluation).
+Depends on RAGService (vector search) and LLMService (evaluation).
 """
 
 from __future__ import annotations
@@ -23,10 +23,11 @@ from typing import Any
 
 from fastapi import Depends
 
-from app.services.collection_service import (
-    CollectionService,
-    get_collection_service,
+from app.services.rag_service import (
+    RAGService,
+    get_rag_service,
 )
+from app.store.vector_store import VectorStore, get_vector_store
 from app.services.llm.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
@@ -57,10 +58,12 @@ class TesterService:
 
     def __init__(
         self,
-        collection_svc: CollectionService,
+        rag_svc: RAGService,
+        store: VectorStore,
         llm_svc: LLMService | None = None,
     ) -> None:
-        self._collection_svc = collection_svc
+        self._rag_svc = rag_svc
+        self._store = store
         self._llm_svc = llm_svc or LLMService()
         self._ground_truth = self._load_ground_truth()
 
@@ -89,21 +92,15 @@ class TesterService:
     @staticmethod
     def _infer_category_from_filename(
         filename: str,
-        collection_svc: CollectionService,
+        store: VectorStore,
     ) -> str | None:
         """
         Attempt to infer the category of a retrieved file by looking at
         its metadata in the collection. Falls back to 'unknown'.
         """
         try:
-            col = collection_svc._get_collection()
-            results = col.get(
-                where={"filename": filename},
-                limit=1,
-                include=["metadatas"],
-            )
-            if results and results.get("metadatas"):
-                meta = results["metadatas"][0]
+            meta = store.get_metadata_by_filename(filename)
+            if meta:
                 return meta.get("category", "unknown")
         except Exception:
             pass
@@ -131,7 +128,7 @@ class TesterService:
             query = case["query"]
             expected = [c.lower() for c in case["expected_categories"]]
 
-            search_resp = self._collection_svc.search(query=query, top_n=top_n)
+            search_resp = self._rag_svc.search(query=query, top_n=top_n)
 
             retrieved_filenames = [r.filename for r in search_resp.results]
 
@@ -205,7 +202,7 @@ class TesterService:
                     actual = "error_or_empty"
                     is_pass = expected in ("error_or_empty",)
                 else:
-                    search_resp = self._collection_svc.search(
+                    search_resp = self._rag_svc.search(
                         query=query, top_n=top_n,
                     )
                     n_results = len(search_resp.results)
@@ -286,7 +283,7 @@ class TesterService:
             expected_cat = case["expected_category"].lower()
             confusing = [c.lower() for c in case["confusing_categories"]]
 
-            search_resp = self._collection_svc.search(query=query, top_n=top_n)
+            search_resp = self._rag_svc.search(query=query, top_n=top_n)
 
             top1_filename = (
                 search_resp.results[0].filename
@@ -296,7 +293,7 @@ class TesterService:
 
             # Try to infer the category from metadata
             top1_category = self._infer_category_from_filename(
-                top1_filename, self._collection_svc
+                top1_filename, self._store
             )
 
             # Check: top-1 should match expected, not confusing
@@ -404,7 +401,7 @@ class TesterService:
             query = case["query"]
             expected_ranking = case["expected_ranking"]
 
-            search_resp = self._collection_svc.search(query=query, top_n=top_n)
+            search_resp = self._rag_svc.search(query=query, top_n=top_n)
 
             # Build the expected category order
             expected_cats = [
@@ -415,7 +412,7 @@ class TesterService:
             actual_cats: list[str] = []
             for result in search_resp.results:
                 cat = self._infer_category_from_filename(
-                    result.filename, self._collection_svc
+                    result.filename, self._store
                 )
                 actual_cats.append(cat)
 
@@ -498,10 +495,11 @@ class TesterService:
 # ── FastAPI dependency ───────────────────────────────────────────────
 
 def get_tester_service(
-    collection_svc: CollectionService = Depends(get_collection_service),
+    rag_svc: RAGService = Depends(get_rag_service),
+    store: VectorStore = Depends(get_vector_store),
 ) -> TesterService:
     """
     FastAPI dependency.  Builds a TesterService backed by the singleton
-    CollectionService and a fresh LLMService.
+    RAGService, VectorStore, and a fresh LLMService.
     """
-    return TesterService(collection_svc)
+    return TesterService(rag_svc, store)
